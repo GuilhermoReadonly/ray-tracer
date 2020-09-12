@@ -1,25 +1,29 @@
 use crate::{error::RTError, math::Vec3};
 use std::{fmt::Display, fs::File, io::Write};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Color {
-    vec: Vec3,
+    pub vec: Vec3,
 }
 
 impl Color {
-    fn new(r: f64, g: f64, b: f64) -> Self {
+    pub fn new(r: f64, g: f64, b: f64) -> Self {
         Color {
             vec: Vec3::new(r, g, b),
         }
     }
 
-    fn r(&self) -> f64 {
+    pub fn new_with_vec(vec: Vec3) -> Self {
+        Color { vec }
+    }
+
+    pub fn r(&self) -> f64 {
         self.vec.x
     }
-    fn g(&self) -> f64 {
+    pub fn g(&self) -> f64 {
         self.vec.y
     }
-    fn b(&self) -> f64 {
+    pub fn b(&self) -> f64 {
         self.vec.z
     }
 }
