@@ -51,11 +51,13 @@ impl Image {
 
 pub fn create_img(img_height: u32, img_width: u32) -> Image {
     let capacity = (img_height * img_width) as usize;
-    dbg!(capacity);
     let mut img: Vec<Color> = Vec::with_capacity(capacity);
 
     for j in 0..img_height {
         for i in 0..img_width {
+            // let progression = ((i+1)*(j+1)) as f64 / (img_height*img_width) as f64;
+            // eprintln!("Progression: {}%", progression*100.0);
+
             let color = Color::new(
                 (i as f64 / img_width as f64 * 256.0) as u32,
                 (j as f64 / img_height as f64 * 256.0) as u32,
@@ -70,9 +72,12 @@ pub fn create_img(img_height: u32, img_width: u32) -> Image {
 }
 
 pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
-
     if img.height * img.width != img.pixels.len() as u32 {
-        return Err(RTError::InconsistencySizePixels{ h: img.height, w: img.width , nb_pixels: img.pixels.len() })
+        return Err(RTError::InconsistencySizePixels {
+            h: img.height,
+            w: img.width,
+            nb_pixels: img.pixels.len(),
+        });
     };
     let mut file = File::create(&path).map_err(|e| RTError::IO(e))?;
 
@@ -110,12 +115,15 @@ mod tests {
 
         let result = write_img_to_ppm("./target/test.ppm", img);
 
-        if let Err(RTError::InconsistencySizePixels{h,w,nb_pixels}) = result {
-            assert_eq!(h,12);
-            assert_eq!(w,8);
-            assert_eq!(nb_pixels,13 * 8);
+        if let Err(RTError::InconsistencySizePixels { h, w, nb_pixels }) = result {
+            assert_eq!(h, 12);
+            assert_eq!(w, 8);
+            assert_eq!(nb_pixels, 13 * 8);
         } else {
-            panic!("We should have a Err(RTError::InconsistencySizePixels) but we got: {:?}", result);
+            panic!(
+                "We should have a Err(RTError::InconsistencySizePixels) but we got: {:?}",
+                result
+            );
         }
     }
 
