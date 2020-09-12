@@ -88,7 +88,19 @@ pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::prelude::*;
     use test;
+
+    fn create_rand_size() -> (u32, u32) {
+        let mut rng = rand::thread_rng();
+
+        (rng.gen_range(0, 50), rng.gen_range(0, 50))
+    }
+
+    fn create_rand_img() -> (Image, u32, u32) {
+        let (h, w) = create_rand_size();
+        (create_img(h, w), h, w)
+    }
 
     #[test]
     fn create_img_empty() {
@@ -99,26 +111,29 @@ mod tests {
     }
 
     #[test]
-    fn create_img_13_8() {
-        let img = create_img(13, 8);
-        let size_img_expected = 13 * 8;
+    fn create_img_test() {
+        let (img, h, w) = create_rand_img();
+        let size_img_expected = h * w;
 
-        assert_eq!(size_img_expected, img.pixels.len());
-        assert_eq!(13, img.height);
-        assert_eq!(8, img.width);
+        assert_eq!(size_img_expected, img.pixels.len() as u32);
+        assert_eq!(h, img.height);
+        assert_eq!(w, img.width);
     }
 
     #[test]
     fn write_bad_img() {
-        let mut img = create_img(13, 8);
-        img.height = 12;
+        let (mut img, h_origin, w_origin) = create_rand_img();
+        let h_modified = h_origin + 1;
+        let w_modified = w_origin + 1;
+        img.height = h_modified;
+        img.width = w_modified;
 
         let result = write_img_to_ppm("./target/test.ppm", img);
 
         if let Err(RTError::InconsistencySizePixels { h, w, nb_pixels }) = result {
-            assert_eq!(h, 12);
-            assert_eq!(w, 8);
-            assert_eq!(nb_pixels, 13 * 8);
+            assert_eq!(h, h_modified);
+            assert_eq!(w, w_modified);
+            assert_eq!(nb_pixels as u32, h_origin * w_origin);
         } else {
             panic!(
                 "We should have a Err(RTError::InconsistencySizePixels) but we got: {:?}",
@@ -129,7 +144,7 @@ mod tests {
 
     #[test]
     fn write_img() {
-        let img = create_img(13, 8);
+        let (img, _, _) = create_rand_img();
 
         let result = write_img_to_ppm("./target/test.ppm", img);
 
