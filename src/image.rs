@@ -57,8 +57,8 @@ pub fn create_img(img_height: u32, img_width: u32) -> Image {
     for j in 0..img_height {
         for i in 0..img_width {
             let color = Color::new(
-                (i as f64 / img_width as f64 * 255.999) as u32,
-                (j as f64 / img_height as f64 * 255.999) as u32,
+                (i as f64 / img_width as f64 * 256.0) as u32,
+                (j as f64 / img_height as f64 * 256.0) as u32,
                 (0.25 * 255.999) as u32,
             );
 
@@ -108,9 +108,24 @@ mod tests {
         let mut img = create_img(13, 8);
         img.height = 12;
 
-        let result = write_img_to_ppm("./test.ppm", img);
+        let result = write_img_to_ppm("./target/test.ppm", img);
+
+        if let Err(RTError::InconsistencySizePixels{h,w,nb_pixels}) = result {
+            assert_eq!(h,12);
+            assert_eq!(w,8);
+            assert_eq!(nb_pixels,13 * 8);
+        } else {
+            panic!("We should have a Err(RTError::InconsistencySizePixels) but we got: {:?}", result);
+        }
+    }
+
+    #[test]
+    fn write_img() {
+        let img = create_img(13, 8);
+
+        let result = write_img_to_ppm("./target/test.ppm", img);
 
         dbg!(&result);
-        assert!(result.is_err());
+        assert!(result.is_ok());
     }
 }

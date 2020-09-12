@@ -9,7 +9,7 @@ fn main() -> Result<(), RTError> {
     println!("Image generated in {} ns", now.elapsed().as_nanos());
 
     let now = Instant::now();
-    image::write_img_to_ppm("./test.ppm", img)?;
+    image::write_img_to_ppm("./target/img.ppm", img)?;
     println!("Image writed in {} ns", now.elapsed().as_nanos());
 
     Ok(())
