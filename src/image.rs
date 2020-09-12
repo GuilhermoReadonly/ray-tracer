@@ -1,22 +1,38 @@
-use crate::error::RTError;
+use crate::{error::RTError, math::Vec3};
 use std::{fmt::Display, fs::File, io::Write};
 
 #[derive(Debug, PartialEq)]
 pub struct Color {
-    r: u32,
-    g: u32,
-    b: u32,
+    vec: Vec3,
 }
 
 impl Color {
-    fn new(r: u32, g: u32, b: u32) -> Self {
-        Color { r, g, b }
+    fn new(r: f64, g: f64, b: f64) -> Self {
+        Color {
+            vec: Vec3::new(r, g, b),
+        }
+    }
+
+    fn r(&self) -> f64 {
+        self.vec.x
+    }
+    fn g(&self) -> f64 {
+        self.vec.y
+    }
+    fn b(&self) -> f64 {
+        self.vec.z
     }
 }
 
 impl Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {}", self.r, self.g, self.b)
+        write!(
+            f,
+            "{} {} {}",
+            (self.r() * 256.0) as u32,
+            (self.g() * 256.0) as u32,
+            (self.b() * 256.0) as u32
+        )
     }
 }
 
@@ -25,6 +41,16 @@ pub struct Image {
     pub pixels: Vec<Color>,
     pub height: u32,
     pub width: u32,
+}
+
+impl Image {
+    fn new(pixels: Vec<Color>, height: u32, width: u32) -> Self {
+        Image {
+            pixels,
+            height,
+            width,
+        }
+    }
 }
 
 impl Display for Image {
@@ -39,16 +65,6 @@ impl Display for Image {
     }
 }
 
-impl Image {
-    fn new(pixels: Vec<Color>, height: u32, width: u32) -> Self {
-        Image {
-            pixels,
-            height,
-            width,
-        }
-    }
-}
-
 pub fn create_img(img_height: u32, img_width: u32) -> Image {
     let capacity = (img_height * img_width) as usize;
     let mut pixels: Vec<Color> = Vec::with_capacity(capacity);
@@ -59,9 +75,9 @@ pub fn create_img(img_height: u32, img_width: u32) -> Image {
             // eprintln!("Progression: {}%", progression*100.0);
 
             let color = Color::new(
-                (i as f64 / img_width as f64 * 256.0) as u32,
-                (j as f64 / img_height as f64 * 256.0) as u32,
-                (0.25 * 255.999) as u32,
+                i as f64 / img_width as f64,
+                j as f64 / img_height as f64,
+                0.25,
             );
 
             pixels.push(color);

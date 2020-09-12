@@ -305,21 +305,19 @@ mod tests {
         let result = &vec1 / &vec1.length();
         assert_eq!(Vec3::unit(&vec1), result);
 
-        
         let n = rng.gen_range(0.0, 1_000.0);
-        let vec1 = Vec3::new(n,0.0,0.0);
-        let result = Vec3::new(1.0,0.0,0.0);
+        let vec1 = Vec3::new(n, 0.0, 0.0);
+        let result = Vec3::new(1.0, 0.0, 0.0);
         assert_eq!(Vec3::unit(&vec1), result);
 
         let n = rng.gen_range(0.0, 1_000.0);
-        let vec1 = Vec3::new(0.0,n,0.0);
-        let result = Vec3::new(0.0,1.0,0.0);
+        let vec1 = Vec3::new(0.0, n, 0.0);
+        let result = Vec3::new(0.0, 1.0, 0.0);
         assert_eq!(Vec3::unit(&vec1), result);
 
         let n = rng.gen_range(0.0, 1_000.0);
-        let vec1 = Vec3::new(0.0,0.0,n);
-        let result = Vec3::new(0.0,0.0,1.0);
+        let vec1 = Vec3::new(0.0, 0.0, n);
+        let result = Vec3::new(0.0, 0.0, 1.0);
         assert_eq!(Vec3::unit(&vec1), result);
     }
-
 }
