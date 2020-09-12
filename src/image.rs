@@ -51,7 +51,7 @@ impl Image {
 
 pub fn create_img(img_height: u32, img_width: u32) -> Image {
     let capacity = (img_height * img_width) as usize;
-    let mut img: Vec<Color> = Vec::with_capacity(capacity);
+    let mut pixels: Vec<Color> = Vec::with_capacity(capacity);
 
     for j in 0..img_height {
         for i in 0..img_width {
@@ -64,11 +64,11 @@ pub fn create_img(img_height: u32, img_width: u32) -> Image {
                 (0.25 * 255.999) as u32,
             );
 
-            img.push(color);
+            pixels.push(color);
         }
     }
 
-    Image::new(img, img_height, img_width)
+    Image::new(pixels, img_height, img_width)
 }
 
 pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
