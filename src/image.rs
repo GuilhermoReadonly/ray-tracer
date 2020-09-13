@@ -1,4 +1,4 @@
-use crate::{error::RTError, math::Vec3};
+use crate::{RTError, Ray, Vec3};
 use std::{fmt::Display, fs::File, io::Write};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -33,9 +33,9 @@ impl Display for Color {
         write!(
             f,
             "{} {} {}",
-            (self.r() * 256.0) as u32,
-            (self.g() * 256.0) as u32,
-            (self.b() * 256.0) as u32
+            (self.r() * 255.999) as u32,
+            (self.g() * 255.999) as u32,
+            (self.b() * 255.999) as u32
         )
     }
 }
@@ -69,20 +69,35 @@ impl Display for Image {
     }
 }
 
-pub fn create_img(img_height: u32, img_width: u32) -> Image {
+pub fn create_img(
+    img_height: u32,
+    img_width: u32,
+    viewport_width: f64,
+    viewport_height: f64,
+    focal_length: f64,
+) -> Image {
     let capacity = (img_height * img_width) as usize;
     let mut pixels: Vec<Color> = Vec::with_capacity(capacity);
 
-    for j in 0..img_height {
+    let origin = Vec3::new(0.0, 0.0, 0.0);
+    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+    let vertical = Vec3::new(0.0, viewport_height, 0.0);
+    let lower_left_corner =
+        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+
+    for j in (0..img_height).rev() {
         for i in 0..img_width {
             // let progression = ((i+1)*(j+1)) as f64 / (img_height*img_width) as f64;
             // eprintln!("Progression: {}%", progression*100.0);
 
-            let color = Color::new(
-                i as f64 / img_width as f64,
-                j as f64 / img_height as f64,
-                0.25,
+            let u = i as f64 / (img_width - 1) as f64;
+            let v = j as f64 / (img_height - 1) as f64;
+            let ray: Ray = Ray::new(
+                origin,
+                lower_left_corner + u * horizontal + v * vertical - origin,
             );
+
+            let color = ray.ray_color();
 
             pixels.push(color);
         }
@@ -119,15 +134,16 @@ mod tests {
 
     fn create_rand_img() -> (Image, u32, u32) {
         let (h, w) = create_rand_size();
-        (create_img(h, w), h, w)
-    }
+        let aspect_ratio: f64 = h as f64 / w as f64;
+        let viewport_height = 2.0;
+        let viewport_width = aspect_ratio * viewport_height;
+        let focal_length = 1.0;
 
-    #[test]
-    fn create_img_empty() {
-        let img = create_img(0, 0);
-        let img_expected: Image = Image::new(vec![], 0, 0);
-
-        assert_eq!(img_expected, img);
+        (
+            create_img(h, w, viewport_height, viewport_width, focal_length),
+            h,
+            w,
+        )
     }
 
     #[test]
