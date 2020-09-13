@@ -1,4 +1,4 @@
-use ray_tracer::{image, RTError};
+use ray_tracer::{self, RTError};
 use std::time::Instant;
 
 fn main() -> Result<(), RTError> {
@@ -16,7 +16,7 @@ fn main() -> Result<(), RTError> {
 
     // Render Image
     let now = Instant::now();
-    let img = image::create_img(
+    let img = ray_tracer::create_img(
         image_height,
         image_width,
         viewport_height,
@@ -27,7 +27,7 @@ fn main() -> Result<(), RTError> {
 
     // Write to .ppm file
     let now = Instant::now();
-    image::write_img_to_ppm("./target/img.ppm", img)?;
+    ray_tracer::write_img_to_ppm("./target/img.ppm", img)?;
     println!("Image writed in {} ns", now.elapsed().as_nanos());
 
     Ok(())

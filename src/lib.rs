@@ -1,7 +1,7 @@
-pub mod error;
-pub mod image;
-pub mod math;
-pub mod ray;
+mod error;
+mod image;
+mod math;
+mod ray;
 
 pub use error::*;
 pub use image::*;
