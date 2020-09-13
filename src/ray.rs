@@ -15,10 +15,23 @@ impl Ray {
     }
 
     pub fn ray_color(&self) -> Color {
-        let unit_direction: Vec3 = Vec3::unit(&self.direction);
-        let t = 0.5 * (unit_direction.y + 1.0);
-        Color::new_with_vec(
-            (1.0 - t) * Color::new(1.0, 1.0, 1.0).vec + t * Color::new(0.5, 0.7, 1.0).vec,
-        )
+        if self.hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5) {
+            Color::new(1.0, 0.0, 0.0)
+        } else {
+            let unit_direction: Vec3 = Vec3::unit(&self.direction);
+            let t = 0.5 * (unit_direction.y + 1.0);
+            Color::new_with_vec(
+                (1.0 - t) * Color::new(1.0, 1.0, 1.0).vec + t * Color::new(0.5, 0.7, 1.0).vec,
+            )
+        }
+    }
+
+    fn hit_sphere(&self, center: Vec3, radius: f64) -> bool {
+        let oc: Vec3 = self.origin - center;
+        let a = Vec3::dot(&self.direction, &self.direction);
+        let b = 2.0 * Vec3::dot(&oc, &self.direction);
+        let c = Vec3::dot(&oc, &oc) - radius * radius;
+        let discriminant = b * b - 4.0 * a * c;
+        discriminant > 0.0
     }
 }
