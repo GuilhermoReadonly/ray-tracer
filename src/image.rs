@@ -1,4 +1,4 @@
-use crate::{RTError, Ray, Vec3};
+use crate::{math::Vec3, RTError, Ray};
 use std::{fmt::Display, fs::File, io::Write};
 
 #[derive(Debug, PartialEq, Clone, Copy)]

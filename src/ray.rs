@@ -1,4 +1,4 @@
-use crate::{Color, Vec3};
+use crate::{math::Sphere, math::Vec3, Color};
 
 pub struct Ray {
     pub origin: Vec3,
@@ -15,10 +15,11 @@ impl Ray {
     }
 
     pub fn ray_color(&self) -> Color {
-        let has_hit = self.hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5);
+        let sphere: Sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
+        let has_hit = sphere.hit(&self, 0.0, 100.0);
         match has_hit {
-            Some(t) => {
-                let n: Vec3 = Vec3::unit(self.at(t) - Vec3::new(0.0, 0.0, -1.0));
+            Some(hit_record) => {
+                let n: Vec3 = hit_record.normal;
                 // we map each component of the normal vector from [-1, 1] to [0, 1] so it can fit in a Color vector
                 Color::new_with_vec(0.5 * Vec3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0))
             }
@@ -31,21 +32,18 @@ impl Ray {
             }
         }
     }
-
-    fn hit_sphere(&self, center: Vec3, radius: f64) -> Option<f64> {
-        let oc: Vec3 = self.origin - center;
-        let a = self.direction.length_squared();
-        let half_b = Vec3::dot(&oc, &self.direction);
-        let c = oc.length_squared() - radius.powi(2);
-        let discriminant = half_b.powi(2) - a * c;
-        if discriminant < 0.0 {
-            None
-        } else {
-            Some((-half_b - discriminant.sqrt()) / a)
-        }
-    }
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct HitRecord {
+    pub point: Vec3,
+    pub normal: Vec3,
+    pub t: f64,
+}
+
+pub trait Hittable {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+}
 
 #[cfg(test)]
 mod tests {
@@ -54,15 +52,18 @@ mod tests {
     use test;
 
     #[test]
-    fn hit_sphere_test() {
+    fn ray_color_test() {
         let origin = Vec3::new(0.0, 0.0, 0.0);
         let direction = Vec3::new(0.0, 0.0, -1.0);
         let ray = Ray::new(origin, direction);
-        let sphere_center = Vec3::new(0.0, 0.0, 0.0);
-        let sphere_radius = 0.5;
 
-        let result = ray.hit_sphere(sphere_center, sphere_radius);
+        let result = ray.ray_color();
 
-        assert_eq!(result, Some(-0.5))
+        assert_eq!(
+            result,
+            Color {
+                vec: Vec3::new(0.5, 0.5, 1.0)
+            }
+        );
     }
 }
