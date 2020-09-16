@@ -93,7 +93,15 @@ impl ops::Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Vec3 {
-        Self::new(-self.x, -self.y, -self.z)
+        - &self
+    }
+}
+
+impl ops::Neg for &Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3 {
+        Vec3::new(-self.x, -self.y, -self.z)
     }
 }
 

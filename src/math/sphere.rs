@@ -10,6 +10,22 @@ impl Sphere {
     pub fn new(center: Vec3, radius: f64) -> Self {
         Sphere { center, radius }
     }
+
+    fn get_hit_record(&self, r: &Ray, t: f64) -> Option<HitRecord>{
+        let point = r.at(t);
+        let outward_normal = (point - self.center) / self.radius;
+        let front_face = Vec3::dot(&r.direction, &outward_normal) < 0.0;
+        let normal = if front_face {outward_normal} else { -outward_normal};
+
+        let hit_record: HitRecord = HitRecord {
+            point,
+            normal,
+            t,
+            front_face,
+        };
+
+        return Some(hit_record);
+    }
 }
 
 impl Hittable for Sphere {
@@ -25,24 +41,12 @@ impl Hittable for Sphere {
 
             let temp = (-half_b - root) / a;
             if temp < t_max && temp > t_min {
-                let point = r.at(temp);
-                let hit_record: HitRecord = HitRecord {
-                    point: point,
-                    normal: (point - self.center) / self.radius,
-                    t: temp,
-                };
-                return Some(hit_record);
+                return self.get_hit_record(r, temp);
             }
 
             let temp = (-half_b + root) / a;
             if temp < t_max && temp > t_min {
-                let point = r.at(temp);
-                let hit_record: HitRecord = HitRecord {
-                    point: point,
-                    normal: (point - self.center) / self.radius,
-                    t: temp,
-                };
-                return Some(hit_record);
+                return self.get_hit_record(r, temp);
             }
         }
 
@@ -69,6 +73,7 @@ mod tests {
             point: Vec3::new(0.0, 0.0, -0.5),
             normal: Vec3::new(0.0, 0.0, 1.0),
             t: 0.5,
+            front_face: true,
         });
 
         assert_eq!(result, expected_result);
