@@ -1,6 +1,7 @@
 use super::Vec3;
 use crate::{HitRecord, Hittable, Ray};
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Sphere {
     center: Vec3,
     radius: f64,
@@ -11,18 +12,17 @@ impl Sphere {
         Sphere { center, radius }
     }
 
-    fn get_hit_record(&self, r: &Ray, t: f64) -> Option<HitRecord>{
+    fn get_hit_record(&self, r: &Ray, t: f64) -> Option<HitRecord> {
         let point = r.at(t);
         let outward_normal = (point - self.center) / self.radius;
         let front_face = Vec3::dot(&r.direction, &outward_normal) < 0.0;
-        let normal = if front_face {outward_normal} else { -outward_normal};
-
-        let hit_record: HitRecord = HitRecord {
-            point,
-            normal,
-            t,
-            front_face,
+        let normal = if front_face {
+            outward_normal
+        } else {
+            -outward_normal
         };
+
+        let hit_record: HitRecord = HitRecord::new(point, normal, t, front_face);
 
         return Some(hit_record);
     }
@@ -69,12 +69,12 @@ mod tests {
         let sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
 
         let result = sphere.hit(&ray, 0.0, 100.0);
-        let expected_result = Some(HitRecord {
-            point: Vec3::new(0.0, 0.0, -0.5),
-            normal: Vec3::new(0.0, 0.0, 1.0),
-            t: 0.5,
-            front_face: true,
-        });
+        let expected_result = Some(HitRecord::new(
+            Vec3::new(0.0, 0.0, -0.5),
+            Vec3::new(0.0, 0.0, 1.0),
+            0.5,
+            true,
+        ));
 
         assert_eq!(result, expected_result);
 

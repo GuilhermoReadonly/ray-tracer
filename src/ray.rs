@@ -1,4 +1,5 @@
 use crate::{math::Sphere, math::Vec3, Color};
+use std::fmt::Debug;
 
 pub struct Ray {
     pub origin: Vec3,
@@ -42,8 +43,62 @@ pub struct HitRecord {
     pub front_face: bool,
 }
 
-pub trait Hittable {
+impl HitRecord {
+    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool) -> Self {
+        HitRecord {
+            point,
+            normal,
+            t,
+            front_face,
+        }
+    }
+}
+
+pub trait Hittable: Debug {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+}
+
+#[derive(Debug)]
+pub struct HittableList {
+    pub objects: Vec<Box<dyn Hittable>>,
+}
+
+impl HittableList {
+    #[allow(dead_code)]
+    fn new() -> Self {
+        HittableList { objects: vec![] }
+    }
+
+    #[allow(dead_code)]
+    fn add(&mut self, object: Box<dyn Hittable>) {
+        self.objects.push(object);
+    }
+
+    #[allow(dead_code)]
+    fn clear(&mut self) {
+        self.objects.clear();
+    }
+}
+
+impl Hittable for HittableList {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut result: Option<HitRecord> = None;
+        for hittable in &self.objects {
+            let hr = (*hittable).hit(r, t_min, t_max);
+            match (hr, result) {
+                (Some(h1), Some(h2)) => {
+                    if h1.t < h2.t {
+                        result = hr;
+                    }
+                }
+                (Some(h1), None) => {
+                    result = Some(h1);
+                }
+                _ => (),
+            }
+        }
+        result
+    }
 }
 
 #[cfg(test)]
@@ -51,6 +106,46 @@ mod tests {
     use super::*;
     //use rand::prelude::*;
     use test;
+
+    #[test]
+    fn hittable_list_test() {
+        let origin = Vec3::new(0.0, 0.0, 0.0);
+        let direction = Vec3::new(0.0, 0.0, -1.0);
+        let ray = Ray::new(origin, direction);
+
+        let mut hittable_list = HittableList::new();
+
+        let sphere1 = Sphere::new(Vec3::new(0.0, 0.0, -2.0), 0.5);
+        let sphere1 = Box::new(sphere1);
+        hittable_list.add(sphere1);
+
+        let result = hittable_list.hit(&ray, 0.0, 100.0);
+        let expected_result = Some(HitRecord::new(
+            Vec3::new(0.0, 0.0, -1.5),
+            Vec3::new(0.0, 0.0, 1.0),
+            1.5,
+            true,
+        ));
+
+        assert_eq!(result, expected_result);
+
+        let sphere2 = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
+        let sphere2 = Box::new(sphere2);
+        hittable_list.add(sphere2);
+
+        let result = hittable_list.hit(&ray, 0.0, 100.0);
+        let expected_result = Some(HitRecord::new(
+            Vec3::new(0.0, 0.0, -0.5),
+            Vec3::new(0.0, 0.0, 1.0),
+            0.5,
+            true,
+        ));
+
+        assert_eq!(result, expected_result);
+
+        hittable_list.clear();
+        assert_eq!(hittable_list.objects.len(), 0);
+    }
 
     #[test]
     fn ray_color_test() {

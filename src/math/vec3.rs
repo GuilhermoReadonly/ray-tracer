@@ -93,7 +93,7 @@ impl ops::Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Vec3 {
-        - &self
+        -&self
     }
 }
 
