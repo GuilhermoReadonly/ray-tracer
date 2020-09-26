@@ -1,4 +1,4 @@
-use crate::{math::Sphere, math::Vec3, Color};
+use crate::{math::Vec3, Color};
 use std::fmt::Debug;
 
 pub struct Ray {
@@ -15,9 +15,8 @@ impl Ray {
         self.origin + t * self.direction
     }
 
-    pub fn ray_color(&self) -> Color {
-        let sphere: Sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
-        let has_hit = sphere.hit(&self, 0.0, 100.0);
+    pub fn ray_color(&self, world: &HittableList) -> Color {
+        let has_hit = world.hit(&self, 0.0, 100.0);
         match has_hit {
             Some(hit_record) => {
                 let n: Vec3 = hit_record.normal;
@@ -64,18 +63,15 @@ pub struct HittableList {
 }
 
 impl HittableList {
-    #[allow(dead_code)]
-    fn new() -> Self {
+    pub fn new() -> Self {
         HittableList { objects: vec![] }
     }
 
-    #[allow(dead_code)]
-    fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Box<dyn Hittable>) {
         self.objects.push(object);
     }
 
-    #[allow(dead_code)]
-    fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.objects.clear();
     }
 }
@@ -105,6 +101,7 @@ impl Hittable for HittableList {
 mod tests {
     use super::*;
     //use rand::prelude::*;
+    use crate::math::Sphere;
     use test;
 
     #[test]
@@ -153,7 +150,10 @@ mod tests {
         let direction = Vec3::new(0.0, 0.0, -1.0);
         let ray = Ray::new(origin, direction);
 
-        let result = ray.ray_color();
+        let sphere: Sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
+        let mut world = HittableList::new();
+        world.add(Box::new(sphere));
+        let result = ray.ray_color(&world);
 
         assert_eq!(
             result,

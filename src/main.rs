@@ -1,4 +1,8 @@
-use ray_tracer::{self, RTError};
+use ray_tracer::{
+    self,
+    math::{Sphere, Vec3},
+    HittableList, RTError,
+};
 use std::time::Instant;
 
 fn main() -> Result<(), RTError> {
@@ -14,6 +18,14 @@ fn main() -> Result<(), RTError> {
     let viewport_width = aspect_ratio * viewport_height;
     let focal_length = 1.0;
 
+    // Create world
+    let mut world = HittableList::new();
+
+    let sphere1 = Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5));
+    world.add(sphere1);
+    let sphere1 = Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0));
+    world.add(sphere1);
+
     // Render Image
     let now = Instant::now();
     let img = ray_tracer::create_img(
@@ -22,6 +34,7 @@ fn main() -> Result<(), RTError> {
         viewport_width,
         viewport_height,
         focal_length,
+        world,
     );
     println!("Image generated in {} ns", now.elapsed().as_nanos());
 

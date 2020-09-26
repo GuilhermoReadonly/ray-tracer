@@ -1,4 +1,4 @@
-use crate::{math::Vec3, RTError, Ray};
+use crate::{math::Vec3, HittableList, RTError, Ray};
 use std::{fmt::Display, fs::File, io::Write};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -75,9 +75,9 @@ pub fn create_img(
     viewport_width: f64,
     viewport_height: f64,
     focal_length: f64,
+    world: HittableList,
 ) -> Image {
-    let capacity = (img_height * img_width) as usize;
-    let mut pixels: Vec<Color> = Vec::with_capacity(capacity);
+    let mut pixels: Vec<Color> = Vec::with_capacity((img_height * img_width) as usize);
 
     let origin = Vec3::new(0.0, 0.0, 0.0);
     let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
@@ -97,7 +97,7 @@ pub fn create_img(
                 lower_left_corner + u * horizontal + v * vertical - origin,
             );
 
-            let color = ray.ray_color();
+            let color = ray.ray_color(&world);
 
             pixels.push(color);
         }
@@ -123,6 +123,7 @@ pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::math::Sphere;
     use rand::prelude::*;
     use test;
 
@@ -139,8 +140,12 @@ mod tests {
         let viewport_width = aspect_ratio * viewport_height;
         let focal_length = 1.0;
 
+        let sphere: Sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
+        let mut world = HittableList::new();
+        world.add(Box::new(sphere));
+
         (
-            create_img(h, w, viewport_height, viewport_width, focal_length),
+            create_img(h, w, viewport_height, viewport_width, focal_length, world),
             h,
             w,
         )
