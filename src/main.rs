@@ -1,7 +1,7 @@
 use ray_tracer::{
     self,
     math::{Sphere, Vec3},
-    HittableList, RTError,
+    Camera, HittableList, RTError,
 };
 use std::time::Instant;
 
@@ -16,7 +16,13 @@ fn main() -> Result<(), RTError> {
     // Camera
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
+
+    let camera = Camera::new(
+        viewport_height,
+        viewport_width,
+        1.0,
+        Vec3::new(0.0, 0.0, 0.0),
+    );
 
     // Create world
     let mut world = HittableList::new();
@@ -28,20 +34,13 @@ fn main() -> Result<(), RTError> {
 
     // Render Image
     let now = Instant::now();
-    let img = ray_tracer::create_img(
-        image_height,
-        image_width,
-        viewport_width,
-        viewport_height,
-        focal_length,
-        world,
-    );
-    println!("Image generated in {} ns", now.elapsed().as_nanos());
+    let img = ray_tracer::create_img(image_height, image_width, world, 1, camera);
+    println!("Image generated in {} ms", now.elapsed().as_millis());
 
     // Write to .ppm file
     let now = Instant::now();
     ray_tracer::write_img_to_ppm("./target/img.ppm", img)?;
-    println!("Image writed in {} ns", now.elapsed().as_nanos());
+    println!("Image writed in {} ms", now.elapsed().as_millis());
 
     Ok(())
 }

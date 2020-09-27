@@ -1,20 +1,26 @@
-use crate::{math::Vec3, HittableList, RTError, Ray};
+use crate::{clamp, math::Vec3, Camera, HittableList, RTError, Ray};
+use rand::Rng;
 use std::{fmt::Display, fs::File, io::Write};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Color {
     pub vec: Vec3,
+    pub samples_per_pixel: u32,
 }
 
 impl Color {
-    pub fn new(r: f64, g: f64, b: f64) -> Self {
+    pub fn new(r: f64, g: f64, b: f64, samples_per_pixel: u32) -> Self {
         Color {
             vec: Vec3::new(r, g, b),
+            samples_per_pixel,
         }
     }
 
-    pub fn new_with_vec(vec: Vec3) -> Self {
-        Color { vec }
+    pub fn new_with_vec(vec: Vec3, samples_per_pixel: u32) -> Self {
+        Color {
+            vec,
+            samples_per_pixel,
+        }
     }
 
     pub fn r(&self) -> f64 {
@@ -30,12 +36,18 @@ impl Color {
 
 impl Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let scale = 1.0 / self.samples_per_pixel as f64;
+
+        let r = self.r() * scale;
+        let g = self.g() * scale;
+        let b = self.b() * scale;
+
         write!(
             f,
             "{} {} {}",
-            (self.r() * 255.999) as u32,
-            (self.g() * 255.999) as u32,
-            (self.b() * 255.999) as u32
+            (256.0 * clamp(r, 0.0, 0.999)) as u32,
+            (256.0 * clamp(g, 0.0, 0.999)) as u32,
+            (256.0 * clamp(b, 0.0, 0.999)) as u32,
         )
     }
 }
@@ -72,34 +84,29 @@ impl Display for Image {
 pub fn create_img(
     img_height: u32,
     img_width: u32,
-    viewport_width: f64,
-    viewport_height: f64,
-    focal_length: f64,
     world: HittableList,
+    samples_per_pixel: u32,
+    camera: Camera,
 ) -> Image {
     let mut pixels: Vec<Color> = Vec::with_capacity((img_height * img_width) as usize);
 
-    let origin = Vec3::new(0.0, 0.0, 0.0);
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lower_left_corner =
-        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+    let mut rng = rand::thread_rng();
 
     for j in (0..img_height).rev() {
         for i in 0..img_width {
             // let progression = ((i+1)*(j+1)) as f64 / (img_height*img_width) as f64;
             // eprintln!("Progression: {}%", progression*100.0);
+            let mut pixel_color = Color::new(0.0, 0.0, 0.0, samples_per_pixel);
+            for _ in 0..samples_per_pixel {
+                let u = (i as f64 + rng.gen_range(0.0, 1.0)) / (img_width - 1) as f64;
+                let v = (j as f64 + rng.gen_range(0.0, 1.0)) / (img_height - 1) as f64;
+                let ray: Ray = camera.get_ray(u, v);
 
-            let u = i as f64 / (img_width - 1) as f64;
-            let v = j as f64 / (img_height - 1) as f64;
-            let ray: Ray = Ray::new(
-                origin,
-                lower_left_corner + u * horizontal + v * vertical - origin,
-            );
+                let ray_color = ray.ray_color(&world, samples_per_pixel);
+                pixel_color.vec = pixel_color.vec + ray_color.vec;
+            }
 
-            let color = ray.ray_color(&world);
-
-            pixels.push(color);
+            pixels.push(pixel_color);
         }
     }
 
@@ -124,7 +131,6 @@ pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
 mod tests {
     use super::*;
     use crate::math::Sphere;
-    use rand::prelude::*;
     use test;
 
     fn create_rand_size() -> (u32, u32) {
@@ -138,17 +144,19 @@ mod tests {
         let aspect_ratio: f64 = h as f64 / w as f64;
         let viewport_height = 2.0;
         let viewport_width = aspect_ratio * viewport_height;
-        let focal_length = 1.0;
+
+        let camera = Camera::new(
+            viewport_height,
+            viewport_width,
+            1.0,
+            Vec3::new(0.0, 0.0, 0.0),
+        );
 
         let sphere: Sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
         let mut world = HittableList::new();
         world.add(Box::new(sphere));
 
-        (
-            create_img(h, w, viewport_height, viewport_width, focal_length, world),
-            h,
-            w,
-        )
+        (create_img(h, w, world, 1, camera), h, w)
     }
 
     #[test]
