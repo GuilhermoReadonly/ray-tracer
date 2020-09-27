@@ -368,6 +368,6 @@ mod tests {
     fn random_unit() {
         let rand_vec = Vec3::new_random_unit();
 
-        assert!(rand_vec.length_squared() == 1.0);
+        assert!(rand_vec.length_squared() > 0.9999 && rand_vec.length_squared() < 1.0001);
     }
 }

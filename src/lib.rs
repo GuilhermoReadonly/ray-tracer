@@ -1,12 +1,14 @@
 mod camera;
 mod error;
 mod image;
+mod materials;
 pub mod math;
 mod ray;
 
 pub use camera::*;
 pub use error::*;
 pub use image::*;
+pub use materials::*;
 pub use ray::*;
 
 #[allow(unused)]
