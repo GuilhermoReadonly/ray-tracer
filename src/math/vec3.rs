@@ -1,4 +1,5 @@
 use std::ops;
+use rand::Rng;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
@@ -10,6 +11,24 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
+    }
+
+    fn new_random(min: f64, max:f64) -> Self {
+        let mut rng = rand::thread_rng();
+        let x: f64 = rng.gen_range(min, max);
+        let y: f64 = rng.gen_range(min, max);
+        let z: f64 = rng.gen_range(min, max);
+
+        Vec3 { x, y, z }
+    }
+
+    pub fn new_random_in_unit_sphere() -> Self {
+        loop {
+            let p = Vec3::new_random(-1.0,1.0);
+            if p.length_squared() < 1.0 {
+                break p
+            }
+        }
     }
 
     pub fn length(&self) -> f64 {
@@ -188,7 +207,6 @@ impl ops::Div<&Vec3> for &f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::prelude::*;
     use test;
 
     fn rand_f64() -> f64 {
@@ -327,5 +345,12 @@ mod tests {
         let vec1 = Vec3::new(0.0, 0.0, n);
         let result = Vec3::new(0.0, 0.0, 1.0);
         assert_eq!(Vec3::unit(vec1), result);
+    }
+
+    #[test]
+    fn random_in_unit_sphere() {
+        let rand_vec = Vec3::new_random_in_unit_sphere();
+
+        assert!(rand_vec.length_squared() < 1.0);
     }
 }

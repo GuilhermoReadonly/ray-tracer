@@ -34,7 +34,7 @@ fn main() -> Result<(), RTError> {
 
     // Render Image
     let now = Instant::now();
-    let img = ray_tracer::create_img(image_height, image_width, world, 1, camera);
+    let img = ray_tracer::create_img(image_height, image_width, world, 100, camera);
     println!("Image generated in {} ms", now.elapsed().as_millis());
 
     // Write to .ppm file
