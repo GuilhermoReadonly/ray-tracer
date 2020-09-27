@@ -19,7 +19,7 @@ impl Ray {
     }
 
     pub fn ray_color(&self, world: &HittableList, samples_per_pixel: u32, depth: u32) -> Color {
-        match (world.hit(&self, 0.0, math::INFINITY), depth) {
+        match (world.hit(&self, 0.001, math::INFINITY), depth) {
             (_, 0) => Color::new(0.0, 0.0, 0.0, samples_per_pixel),
             (Some(hit_record), depth) => {
                 let n: Vec3 = hit_record.normal;
