@@ -38,9 +38,9 @@ impl Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let scale = 1.0 / self.samples_per_pixel as f64;
 
-        let r = self.r() * scale;
-        let g = self.g() * scale;
-        let b = self.b() * scale;
+        let r = (self.r() * scale).sqrt();
+        let g = (self.g() * scale).sqrt();
+        let b = (self.b() * scale).sqrt();
 
         write!(
             f,
@@ -87,7 +87,7 @@ pub fn create_img(
     world: HittableList,
     samples_per_pixel: u32,
     camera: Camera,
-    depth: u32
+    depth: u32,
 ) -> Image {
     let mut pixels: Vec<Color> = Vec::with_capacity((img_height * img_width) as usize);
 

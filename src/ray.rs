@@ -1,4 +1,7 @@
-use crate::{math::{self, Vec3}, Color};
+use crate::{
+    math::{self, Vec3},
+    Color,
+};
 use std::fmt::Debug;
 
 pub struct Ray {
@@ -16,22 +19,19 @@ impl Ray {
     }
 
     pub fn ray_color(&self, world: &HittableList, samples_per_pixel: u32, depth: u32) -> Color {
-
         match (world.hit(&self, 0.0, math::INFINITY), depth) {
-            (_, 0) => {
-                Color::new(0.0, 0.0, 0.0, samples_per_pixel)
-            }
-            (Some(hit_record),depth) => {
+            (_, 0) => Color::new(0.0, 0.0, 0.0, samples_per_pixel),
+            (Some(hit_record), depth) => {
                 let n: Vec3 = hit_record.normal;
                 let p: Vec3 = hit_record.point;
 
                 let target: Vec3 = p + n + Vec3::new_random_in_unit_sphere();
 
-                let new_ray = Ray::new(p, target-p);
+                let new_ray = Ray::new(p, target - p);
 
                 // we map each component of the normal vector from [-1, 1] to [0, 1] so it can fit in a Color vector
                 Color::new_with_vec(
-                    0.5 * new_ray.ray_color(world, samples_per_pixel, depth-1).vec,
+                    0.5 * new_ray.ray_color(world, samples_per_pixel, depth - 1).vec,
                     samples_per_pixel,
                 )
             }
