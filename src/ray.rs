@@ -15,10 +15,13 @@ impl Ray {
         self.origin + t * self.direction
     }
 
-    pub fn ray_color(&self, world: &HittableList, samples_per_pixel: u32) -> Color {
+    pub fn ray_color(&self, world: &HittableList, samples_per_pixel: u32, depth: u32) -> Color {
 
-        match world.hit(&self, 0.0, math::INFINITY) {
-            Some(hit_record) => {
+        match (world.hit(&self, 0.0, math::INFINITY), depth) {
+            (_, 0) => {
+                Color::new(0.0, 0.0, 0.0, samples_per_pixel)
+            }
+            (Some(hit_record),depth) => {
                 let n: Vec3 = hit_record.normal;
                 let p: Vec3 = hit_record.point;
 
@@ -28,11 +31,11 @@ impl Ray {
 
                 // we map each component of the normal vector from [-1, 1] to [0, 1] so it can fit in a Color vector
                 Color::new_with_vec(
-                    0.5 * new_ray.ray_color(world, samples_per_pixel).vec,
+                    0.5 * new_ray.ray_color(world, samples_per_pixel, depth-1).vec,
                     samples_per_pixel,
                 )
             }
-            None => {
+            (None, _) => {
                 let unit_direction: Vec3 = Vec3::unit(self.direction);
                 let t = 0.5 * (unit_direction.y + 1.0);
                 Color::new_with_vec(
@@ -164,8 +167,8 @@ mod tests {
         let sphere: Sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
         let mut world = HittableList::new();
         world.add(Box::new(sphere));
-        let result = ray.ray_color(&world, 1);
+        let result = ray.ray_color(&world, 100, 10);
 
-        assert_eq!(result, Color::new_with_vec(Vec3::new(0.5, 0.5, 1.0), 1));
+        assert_eq!(result.vec.z, 0.5);
     }
 }

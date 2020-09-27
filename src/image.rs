@@ -87,6 +87,7 @@ pub fn create_img(
     world: HittableList,
     samples_per_pixel: u32,
     camera: Camera,
+    depth: u32
 ) -> Image {
     let mut pixels: Vec<Color> = Vec::with_capacity((img_height * img_width) as usize);
 
@@ -102,7 +103,7 @@ pub fn create_img(
                 let v = (j as f64 + rng.gen_range(0.0, 1.0)) / (img_height - 1) as f64;
                 let ray: Ray = camera.get_ray(u, v);
 
-                let ray_color = ray.ray_color(&world, samples_per_pixel);
+                let ray_color = ray.ray_color(&world, samples_per_pixel, depth);
                 pixel_color.vec = pixel_color.vec + ray_color.vec;
             }
 
@@ -156,7 +157,7 @@ mod tests {
         let mut world = HittableList::new();
         world.add(Box::new(sphere));
 
-        (create_img(h, w, world, 1, camera), h, w)
+        (create_img(h, w, world, 1, camera, 10), h, w)
     }
 
     #[test]
