@@ -25,7 +25,7 @@ impl Ray {
                 let n: Vec3 = hit_record.normal;
                 let p: Vec3 = hit_record.point;
 
-                let target: Vec3 = p + n + Vec3::new_random_in_unit_sphere();
+                let target: Vec3 = p + n + Vec3::new_random_unit();
 
                 let new_ray = Ray::new(p, target - p);
 

@@ -1,3 +1,4 @@
+use super::TAU;
 use rand::Rng;
 use std::ops;
 
@@ -29,6 +30,15 @@ impl Vec3 {
                 break p;
             }
         }
+    }
+
+    pub fn new_random_unit() -> Self {
+        let mut rng = rand::thread_rng();
+        let a: f64 = rng.gen_range(0.0, TAU);
+        let z: f64 = rng.gen_range(-1.0, 1.0);
+        let r: f64 = (1.0 - z.powi(2)).sqrt();
+
+        Vec3::new(r * a.cos(), r * a.sin(), z)
     }
 
     pub fn length(&self) -> f64 {
@@ -352,5 +362,12 @@ mod tests {
         let rand_vec = Vec3::new_random_in_unit_sphere();
 
         assert!(rand_vec.length_squared() < 1.0);
+    }
+
+    #[test]
+    fn random_unit() {
+        let rand_vec = Vec3::new_random_unit();
+
+        assert!(rand_vec.length_squared() == 1.0);
     }
 }
