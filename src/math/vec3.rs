@@ -64,6 +64,10 @@ impl Vec3 {
     pub fn unit(vec1: Vec3) -> Vec3 {
         vec1 / vec1.length()
     }
+
+    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+        v - &(2.0 * Vec3::dot(v, n) * n)
+    }
 }
 
 impl ops::Add<Vec3> for Vec3 {
@@ -163,6 +167,14 @@ impl ops::Mul<&Vec3> for &f64 {
 
     fn mul(self, other: &Vec3) -> Vec3 {
         other * self
+    }
+}
+
+impl ops::Mul<&Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, other: &Vec3) -> Vec3 {
+        Vec3::new(self * other.x, self * other.y, self * other.z)
     }
 }
 
