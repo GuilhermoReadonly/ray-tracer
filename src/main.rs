@@ -23,31 +23,26 @@ fn main() -> Result<(), RTError> {
         viewport_height,
         viewport_width,
         1.0,
-        Vec3::new(0.0, 0.1, 0.0),
+        Vec3::new(0.0, 0.0, 0.0),
     );
 
     // Create world
     let mut world = HittableList::new();
 
-    let material1: Lambertian = Lambertian::new(Color::new(0.8, 0.2, 0.2));
-    let sphere1 = Box::new(Sphere::new(Vec3::new(0.75, 0.0, -1.0), 0.5, material1));
-    world.add(sphere1);
+    let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
+    let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    let material_left   = Metal::new(Color::new(0.8, 0.8, 0.8));
+    let material_right  = Metal::new(Color::new(0.8, 0.6, 0.2));
 
-    let material1: Lambertian = Lambertian::new(Color::new(0.0, 0.9, 0.2));
-    let sphere1 = Box::new(Sphere::new(Vec3::new(-0.75, 0.0, -1.0), 0.5, material1));
-    world.add(sphere1);
+    let sphere_ground = Box::new(Sphere::new( Vec3::new( 0.0, -100.5, -1.0), 100.0, material_ground));
+    let sphere_center = Box::new(Sphere::new( Vec3::new( 0.0,    0.0, -1.0),   0.5, material_center));
+    let sphere_left = Box::new(Sphere::new( Vec3::new(-1.0,    0.0, -1.0),   0.5, material_left));
+    let sphere_right = Box::new(Sphere::new( Vec3::new( 1.0,    0.0, -1.0),   0.5, material_right));
 
-    let material1: Lambertian = Lambertian::new(Color::new(0.1, 0.1, 0.8));
-    let sphere1 = Box::new(Sphere::new(Vec3::new(0.0, 1.25, -2.0), 0.5, material1));
-    world.add(sphere1);
-
-    let material1: Metal = Metal::new(Color::new(0.6, 0.6, 0.6));
-    let sphere1 = Box::new(Sphere::new(Vec3::new(-0.0, 0.0, -1.75), 0.5, material1));
-    world.add(sphere1);
-
-    let material2: Lambertian = Lambertian::new(Color::new(0.2, 0.2, 0.2));
-    let sphere2 = Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, material2));
-    world.add(sphere2);
+    world.add(sphere_ground);
+    world.add(sphere_center);
+    world.add(sphere_left);
+    world.add(sphere_right);
 
     // Render Image
     let now = Instant::now();
