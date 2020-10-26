@@ -1,7 +1,7 @@
 use ray_tracer::{
     self,
     math::{Sphere, Vec3},
-    Camera, Color, HittableList, Lambertian, Metal, RTError, Dielectric,
+    Camera, Color, Dielectric, HittableList, Lambertian, Metal, RTError,
 };
 use std::time::Instant;
 
