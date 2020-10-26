@@ -30,9 +30,9 @@ fn main() -> Result<(), RTError> {
     let mut world = HittableList::new();
 
     let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    let material_center = Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5);
-    let material_center2 = Dielectric::new(Color::new(0.5, 0.5, 1.0), 1.5);
-    let material_left = Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5);
+    let material_center = Lambertian::new(Color::new(0.1, 0.2, 0.5));
+    //let material_center2 = Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5);
+    let material_left = Dielectric::new(Color::new(0.9, 0.9, 0.9), 1.5);
     let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
 
     let sphere_ground = Box::new(Sphere::new(
@@ -41,7 +41,7 @@ fn main() -> Result<(), RTError> {
         material_ground,
     ));
     let sphere_center = Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, material_center));
-    let _sphere_center2 = Box::new(Sphere::new(Vec3::new(0.0, 0.75, -2.0), 0.5, material_center2));
+    //let sphere_center2 = Box::new(Sphere::new(Vec3::new(0.0, 0.75, -2.0), 0.5, material_center2));
     let sphere_left = Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
     let sphere_right = Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
 
