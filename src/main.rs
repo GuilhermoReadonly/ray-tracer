@@ -11,8 +11,8 @@ fn main() -> Result<(), RTError> {
     let samples_per_pixel = 100;
 
     // Image
-    let image_width: u32 = 800;
-    let image_height: u32 = 450;
+    let image_width: u32 = 400;
+    let image_height: u32 = 225;
     let aspect_ratio: f64 = image_width as f64 / image_height as f64; // = 16/9
 
     // Camera
@@ -31,13 +31,17 @@ fn main() -> Result<(), RTError> {
 
     let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
     let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
-    let material_left   = Metal::new(Color::new(0.8, 0.8, 0.8));
-    let material_right  = Metal::new(Color::new(0.8, 0.6, 0.2));
+    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
+    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
 
-    let sphere_ground = Box::new(Sphere::new( Vec3::new( 0.0, -100.5, -1.0), 100.0, material_ground));
-    let sphere_center = Box::new(Sphere::new( Vec3::new( 0.0,    0.0, -1.0),   0.5, material_center));
-    let sphere_left = Box::new(Sphere::new( Vec3::new(-1.0,    0.0, -1.0),   0.5, material_left));
-    let sphere_right = Box::new(Sphere::new( Vec3::new( 1.0,    0.0, -1.0),   0.5, material_right));
+    let sphere_ground = Box::new(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        material_ground,
+    ));
+    let sphere_center = Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, material_center));
+    let sphere_left = Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
+    let sphere_right = Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
 
     world.add(sphere_ground);
     world.add(sphere_center);
