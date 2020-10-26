@@ -38,11 +38,6 @@ impl Metal {
 
 impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Ray, Color)> {
-        // let scatter_direction = hit_record.normal + Vec3::new_random_unit();
-        // let scattered = Ray::new(hit_record.point, scatter_direction);
-        // let attenuation = self.albedo;
-        // Some((scattered, attenuation))
-
         let reflected = Vec3::reflect(&Vec3::unit(ray_in.direction), &hit_record.normal);
         let scattered = Ray::new(
             hit_record.point,
@@ -54,5 +49,31 @@ impl Material for Metal {
         } else {
             None
         }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct Dielectric {
+    pub albedo: Color,
+    pub ir: f64,
+}
+
+impl Dielectric {
+    pub fn new(albedo: Color, ir: f64) -> Dielectric {
+        Dielectric { albedo, ir }
+    }
+}
+
+impl Material for Dielectric {
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Ray, Color)> {
+
+        let refraction_ratio = if hit_record.front_face  {1.0/self.ir} else {self.ir};
+
+        let unit_direction = Vec3::unit(ray_in.direction);
+        let refracted = Vec3::refract(&unit_direction, &hit_record.normal, refraction_ratio);
+
+        let scattered = Ray::new(hit_record.point, refracted);
+
+        Some((scattered, self.albedo))
     }
 }
