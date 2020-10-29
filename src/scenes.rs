@@ -7,7 +7,7 @@ use ray_tracer::{
 
 #[allow(unused)]
 pub fn test_defocus_scene() -> (Image, HittableList, Camera) {
-    let aspect_ratio = 16.0/9.0;
+    let aspect_ratio = 16.0 / 9.0;
 
     // World
     let mut world = HittableList::new();
@@ -58,6 +58,11 @@ pub fn test_defocus_scene() -> (Image, HittableList, Camera) {
 #[allow(unused)]
 pub fn test_random_scene() -> (Image, HittableList, Camera) {
     let aspect_ratio = 3.0 / 2.0;
+
+    // Image
+    let image_width: u32 = 100;
+    let image_height: u32 = (image_width as f64 / aspect_ratio) as u32;
+    let img = Image::new(image_height, image_width);
 
     // World
     let mut world = HittableList::new();
@@ -127,11 +132,6 @@ pub fn test_random_scene() -> (Image, HittableList, Camera) {
         aperture,
         focus_dist,
     );
-
-    // Image
-    let image_width: u32 = 1200;
-    let image_height: u32 = (image_width as f64 / aspect_ratio) as u32;
-    let img = Image::new(image_height, image_width);
 
     (img, world, camera)
 }

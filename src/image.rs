@@ -1,4 +1,5 @@
 use crate::{clamp, math::Vec3, Camera, HittableList, RTError, Ray};
+use image::{ImageBuffer};
 use rand::Rng;
 use std::{fmt::Display, fs::File, io::Write, ops, time::Instant};
 
@@ -100,7 +101,7 @@ pub fn create_img(
     let mut ray_traced = 0;
 
     let mut timer = Instant::now();
-    
+
     for j in (0..img.height).rev() {
         for i in 0..img.width {
             // let progression = ((i+1)*(j+1)) as f64 / (img_height*img_width) as f64;
@@ -115,9 +116,12 @@ pub fn create_img(
                 pixel_color.vec = pixel_color.vec + ray_color.vec;
 
                 ray_traced = ray_traced + 1;
-                if timer.elapsed().as_secs_f64() >= 1.0{
+                if timer.elapsed().as_secs_f64() >= 1.0 {
                     let percent = ray_traced as f64 / total_rays_to_trace as f64 * 100.0;
-                    println!("{:.2}% done, {} over {}", percent, ray_traced, total_rays_to_trace);
+                    println!(
+                        "{:.2}% done, {} over {}",
+                        percent, ray_traced, total_rays_to_trace
+                    );
                     timer = Instant::now();
                 }
             }
@@ -130,6 +134,7 @@ pub fn create_img(
 }
 
 pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
+
     if img.height * img.width != img.pixels.len() as u32 {
         return Err(RTError::InconsistencySizePixels {
             h: img.height,
@@ -137,10 +142,23 @@ pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
             nb_pixels: img.pixels.len(),
         });
     };
-    let mut file = File::create(&path).map_err(|e| RTError::IO(e))?;
 
-    file.write_all((&img.to_string()).as_bytes())
-        .map_err(|e| RTError::IO(e))
+    // let mut img_to_write: RgbImage = ImageBuffer::new(img.width,img.height);
+
+    // for h in 0..img_to_write.height() {
+    //     for w in 0..img_to_write.width() {
+    //         let mut pixel = img_to_write[(h, w)];
+    //         pixel.
+    //         // Put a pixel at coordinate (100, 100).
+    //         img_to_write.put_pixel(w, h, pixel);
+    //     }
+    // }
+
+    let img_to_write = ImageBuffer::from_fn(img.width,img.height, |w, h| {
+            image::Rgb([255 as u8,0 as u8,0 as u8])
+    });
+
+    img_to_write.save("./target/empty.jpg").map_err(|e| RTError::ImageRS)
 }
 
 // #[cfg(test)]

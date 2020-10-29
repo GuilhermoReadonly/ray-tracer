@@ -7,6 +7,7 @@ use std::{
 #[derive(Debug)]
 pub enum RTError {
     IO(IOError),
+    ImageRS,
     EmptyImg,
     InconsistencySizePixels { h: u32, w: u32, nb_pixels: usize },
 }
@@ -17,6 +18,7 @@ impl Display for RTError {
             RTError::EmptyImg => write!(f, "The image is empty"),
             // This is a wrapper, so defer to the underlying types' implementation of `fmt`.
             RTError::IO(ref e) => e.fmt(f),
+            RTError::ImageRS=>write!(f, "Error in the image lib"),
             RTError::InconsistencySizePixels { h, w, nb_pixels } => write!(
                 f,
                 "The size {}*{} do not equals the nb of pixels {}",

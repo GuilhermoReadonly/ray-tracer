@@ -7,7 +7,7 @@ mod ray;
 
 pub use camera::*;
 pub use error::*;
-pub use image::*;
+pub use self::image::*;
 pub use materials::*;
 pub use ray::*;
 
