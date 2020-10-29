@@ -14,7 +14,7 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
-    fn new_random(min: f64, max: f64) -> Self {
+    pub fn new_random(min: f64, max: f64) -> Self {
         let mut rng = rand::thread_rng();
         let x: f64 = rng.gen_range(min, max);
         let y: f64 = rng.gen_range(min, max);
@@ -39,6 +39,17 @@ impl Vec3 {
         let r: f64 = (1.0 - z.powi(2)).sqrt();
 
         Vec3::new(r * a.cos(), r * a.sin(), z)
+    }
+
+    pub fn new_random_in_unit_disk() -> Self {
+        let mut rng = rand::thread_rng();
+        loop {
+            let p = Vec3::new(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0), 0.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            };
+            break p;
+        }
     }
 
     pub fn length(&self) -> f64 {

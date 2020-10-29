@@ -17,6 +17,10 @@ impl<M: Material> Sphere<M> {
         }
     }
 
+    pub fn new_boxed(center: Vec3, radius: f64, material: M) -> Box<Self> {
+        Box::new(Self::new(center, radius, material))
+    }
+
     fn get_hit_record(&self, r: &Ray, t: f64) -> Option<HitRecord> {
         let point = r.at(t);
         let outward_normal = (point - self.center) / self.radius;

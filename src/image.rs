@@ -1,6 +1,6 @@
 use crate::{clamp, math::Vec3, Camera, HittableList, RTError, Ray};
 use rand::Rng;
-use std::{fmt::Display, fs::File, io::Write, ops};
+use std::{fmt::Display, fs::File, io::Write, ops, time::Instant};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Color {
@@ -16,6 +16,10 @@ impl Color {
 
     pub fn new_with_vec(vec: Vec3) -> Self {
         Color { vec }
+    }
+
+    pub fn new_random() -> Self {
+        Color::new_with_vec(Vec3::new_random(0.0, 1.0))
     }
 
     pub fn r(&self) -> f64 {
@@ -61,7 +65,8 @@ pub struct Image {
 }
 
 impl Image {
-    fn new(pixels: Vec<Color>, height: u32, width: u32) -> Self {
+    pub fn new(height: u32, width: u32) -> Self {
+        let pixels: Vec<Color> = Vec::with_capacity((height * width) as usize);
         Image {
             pixels,
             height,
@@ -83,36 +88,45 @@ impl Display for Image {
 }
 
 pub fn create_img(
-    img_height: u32,
-    img_width: u32,
+    mut img: Image,
     world: HittableList,
     samples_per_pixel: u32,
     camera: Camera,
     depth: u32,
 ) -> Image {
-    let mut pixels: Vec<Color> = Vec::with_capacity((img_height * img_width) as usize);
-
     let mut rng = rand::thread_rng();
 
-    for j in (0..img_height).rev() {
-        for i in 0..img_width {
+    let total_rays_to_trace = img.height * img.width * samples_per_pixel;
+    let mut ray_traced = 0;
+
+    let mut timer = Instant::now();
+    
+    for j in (0..img.height).rev() {
+        for i in 0..img.width {
             // let progression = ((i+1)*(j+1)) as f64 / (img_height*img_width) as f64;
             // eprintln!("Progression: {}%", progression*100.0);
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..samples_per_pixel {
-                let u = (i as f64 + rng.gen_range(0.0, 1.0)) / (img_width - 1) as f64;
-                let v = (j as f64 + rng.gen_range(0.0, 1.0)) / (img_height - 1) as f64;
+                let u = (i as f64 + rng.gen_range(0.0, 1.0)) / (img.width - 1) as f64;
+                let v = (j as f64 + rng.gen_range(0.0, 1.0)) / (img.height - 1) as f64;
                 let ray: Ray = camera.get_ray(u, v);
 
                 let ray_color = ray.ray_color(&world, depth);
                 pixel_color.vec = pixel_color.vec + ray_color.vec;
+
+                ray_traced = ray_traced + 1;
+                if timer.elapsed().as_secs_f64() >= 1.0{
+                    let percent = ray_traced as f64 / total_rays_to_trace as f64 * 100.0;
+                    println!("{:.2}% done, {} over {}", percent, ray_traced, total_rays_to_trace);
+                    timer = Instant::now();
+                }
             }
             pixel_color.vec = pixel_color.vec / samples_per_pixel as f64;
-            pixels.push(pixel_color);
+            img.pixels.push(pixel_color);
         }
     }
 
-    Image::new(pixels, img_height, img_width)
+    img
 }
 
 pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
