@@ -60,9 +60,9 @@ pub fn test_random_scene() -> (Image, HittableList, Camera) {
     let aspect_ratio = 3.0 / 2.0;
 
     // Image
-    let image_width: u32 = 100;
+    let image_width: u32 = 1200;
     let image_height: u32 = (image_width as f64 / aspect_ratio) as u32;
-    let img = Image::new(image_height, image_width);
+    let img = Image::new(image_width, image_height);
 
     // World
     let mut world = HittableList::new();
@@ -106,13 +106,13 @@ pub fn test_random_scene() -> (Image, HittableList, Camera) {
         }
     }
 
-    let material1 = Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5);
-    world.add(Sphere::new_boxed(Vec3::new(0.0, 1.0, 0.0), 1.0, material1));
-
     let material2 = Lambertian::new(Color::new(0.4, 0.2, 0.1));
     world.add(Sphere::new_boxed(Vec3::new(-4.0, 1.0, 0.0), 1.0, material2));
 
-    let material3 = Dielectric::new(Color::new(0.7, 0.6, 0.5), 0.0);
+    let material1 = Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5);
+    world.add(Sphere::new_boxed(Vec3::new(0.0, 1.0, 0.0), 1.0, material1));
+
+    let material3 = Metal::new(Color::new(0.7, 0.6, 0.5), 0.0);
     world.add(Sphere::new_boxed(Vec3::new(4.0, 1.0, 0.0), 1.0, material3));
 
     // Camera
