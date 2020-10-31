@@ -5,9 +5,9 @@ mod materials;
 pub mod math;
 mod ray;
 
+pub use self::image::*;
 pub use camera::*;
 pub use error::*;
-pub use image::*;
 pub use materials::*;
 pub use ray::*;
 

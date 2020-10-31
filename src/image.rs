@@ -1,6 +1,7 @@
 use crate::{clamp, math::Vec3, Camera, HittableList, RTError, Ray};
+use image::ImageBuffer;
 use rand::Rng;
-use std::{fmt::Display, fs::File, io::Write, ops, time::Instant};
+use std::{collections::HashMap, ops, time::Instant};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Color {
@@ -41,49 +42,31 @@ impl ops::Mul<Color> for Color {
     }
 }
 
-impl Display for Color {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let r = self.r().sqrt();
-        let g = self.g().sqrt();
-        let b = self.b().sqrt();
-
-        write!(
-            f,
-            "{} {} {}",
-            (256.0 * clamp(r, 0.0, 0.999)) as u32,
-            (256.0 * clamp(g, 0.0, 0.999)) as u32,
-            (256.0 * clamp(b, 0.0, 0.999)) as u32,
-        )
-    }
-}
-
 #[derive(Debug, PartialEq)]
 pub struct Image {
-    pub pixels: Vec<Color>,
-    pub height: u32,
+    pub pixels: HashMap<(u32, u32), Color>,
     pub width: u32,
+    pub height: u32,
 }
 
 impl Image {
-    pub fn new(height: u32, width: u32) -> Self {
-        let pixels: Vec<Color> = Vec::with_capacity((height * width) as usize);
+    pub fn new(width: u32, height: u32) -> Self {
+        let pixels = HashMap::with_capacity((height * width) as usize);
         Image {
             pixels,
-            height,
             width,
+            height,
         }
     }
-}
 
-impl Display for Image {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "P3\n")?;
-        write!(f, "{} {}\n", self.width, self.height)?;
-        write!(f, "255\n")?;
-        for p in self.pixels.iter() {
-            write!(f, "{}\n", p)?;
-        }
-        Ok(())
+    pub fn add_pixel(&mut self, width: u32, height: u32, color: Color) {
+        self.pixels.insert((width, height), color);
+    }
+
+    pub fn get_color_pixel(&self, width: u32, height: u32) -> Color {
+        let mut color = self.pixels.get(&(width, height));
+        let default = Color::new(0.0, 0.0, 0.0);
+        **color.get_or_insert(&default)
     }
 }
 
@@ -100,36 +83,39 @@ pub fn create_img(
     let mut ray_traced = 0;
 
     let mut timer = Instant::now();
-    
-    for j in (0..img.height).rev() {
-        for i in 0..img.width {
+
+    for h in (0..img.height).rev() {
+        for w in 0..img.width {
             // let progression = ((i+1)*(j+1)) as f64 / (img_height*img_width) as f64;
             // eprintln!("Progression: {}%", progression*100.0);
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..samples_per_pixel {
-                let u = (i as f64 + rng.gen_range(0.0, 1.0)) / (img.width - 1) as f64;
-                let v = (j as f64 + rng.gen_range(0.0, 1.0)) / (img.height - 1) as f64;
+                let u = (w as f64 + rng.gen_range(0.0, 1.0)) / (img.width - 1) as f64;
+                let v = (h as f64 + rng.gen_range(0.0, 1.0)) / (img.height - 1) as f64;
                 let ray: Ray = camera.get_ray(u, v);
 
                 let ray_color = ray.ray_color(&world, depth);
                 pixel_color.vec = pixel_color.vec + ray_color.vec;
 
                 ray_traced = ray_traced + 1;
-                if timer.elapsed().as_secs_f64() >= 1.0{
+                if timer.elapsed().as_secs_f64() >= 1.0 {
                     let percent = ray_traced as f64 / total_rays_to_trace as f64 * 100.0;
-                    println!("{:.2}% done, {} over {}", percent, ray_traced, total_rays_to_trace);
+                    println!(
+                        "{:.2}% done, {} over {}",
+                        percent, ray_traced, total_rays_to_trace
+                    );
                     timer = Instant::now();
                 }
             }
             pixel_color.vec = pixel_color.vec / samples_per_pixel as f64;
-            img.pixels.push(pixel_color);
+            img.add_pixel(w, h, pixel_color);
         }
     }
 
     img
 }
 
-pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
+pub fn write_img_to_file(path: &str, img: Image) -> Result<(), RTError> {
     if img.height * img.width != img.pixels.len() as u32 {
         return Err(RTError::InconsistencySizePixels {
             h: img.height,
@@ -137,10 +123,17 @@ pub fn write_img_to_ppm(path: &str, img: Image) -> Result<(), RTError> {
             nb_pixels: img.pixels.len(),
         });
     };
-    let mut file = File::create(&path).map_err(|e| RTError::IO(e))?;
 
-    file.write_all((&img.to_string()).as_bytes())
-        .map_err(|e| RTError::IO(e))
+    let img_to_write = ImageBuffer::from_fn(img.width, img.height, |w, h| {
+        let color = img.get_color_pixel(img.width - w, h);
+        let r = (256.0 * clamp(color.r().sqrt(), 0.0, 0.999)) as u8;
+        let g = (256.0 * clamp(color.g().sqrt(), 0.0, 0.999)) as u8;
+        let b = (256.0 * clamp(color.b().sqrt(), 0.0, 0.999)) as u8;
+
+        image::Rgb([r, g, b])
+    });
+
+    img_to_write.save(path).map_err(|e| RTError::ImageRS(e))
 }
 
 // #[cfg(test)]
