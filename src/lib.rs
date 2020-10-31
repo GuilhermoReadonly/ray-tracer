@@ -4,12 +4,14 @@ mod image;
 mod materials;
 pub mod math;
 mod ray;
+mod world;
 
 pub use self::image::*;
 pub use camera::*;
 pub use error::*;
 pub use materials::*;
 pub use ray::*;
+pub use world::*;
 
 fn clamp(x: f64, min: f64, max: f64) -> f64 {
     if x < min {

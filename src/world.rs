@@ -1,77 +1,48 @@
-use crate::{
-    math::{self, Vec3},
-    Color, Material, World,
-};
+use crate::{Color, HitRecord, Hittable, Ray};
 // use std::fmt::Debug;
 
-pub struct Ray {
-    pub origin: Vec3,
-    pub direction: Vec3,
+pub struct World<F>
+where
+    F: Fn(&Ray) -> Color,
+{
+    pub objects: Vec<Box<dyn Hittable>>,
+    pub background: F,
 }
 
-impl Ray {
-    pub fn new(origin: Vec3, direction: Vec3) -> Self {
-        Self { origin, direction }
+impl<F> World<F>
+where
+    F: Fn(&Ray) -> Color,
+{
+    pub fn new(background: F) -> Self {
+        World {
+            objects: vec![],
+            background,
+        }
     }
 
-    pub fn at(self: &Self, t: f64) -> Vec3 {
-        self.origin + t * self.direction
+    pub fn add(&mut self, object: Box<dyn Hittable>) {
+        self.objects.push(object);
     }
 
-    pub fn ray_color<F>(&self, world: &World<F>, depth: u32) -> Color
-    where
-        F: Fn(&Ray) -> Color,
-    {
-        match (world.hit(&self, 0.001, math::INFINITY), depth) {
-            // If the ray bounced enougth (depth = 0) we consider it is now completly black and we stop here
-            (_, 0) => Color::new(0.0, 0.0, 0.0),
+    pub fn clear(&mut self) {
+        self.objects.clear();
+    }
+}
 
-            // If the ray hit something ,we scater it and decrement the depth counter
-            (Some(hit_record), depth) => {
-                if let Some((scattered, attenuation)) =
-                    hit_record.material.scatter(&self, &hit_record)
-                {
-                    let emitted = hit_record.material.emitted();
-                    emitted + attenuation * scattered.ray_color(world, depth - 1)
-                } else {
-                    hit_record.material.emitted()
-                }
+impl<F> Hittable for World<F>
+where
+    F: Fn(&Ray) -> Color,
+{
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut closest_so_far = t_max;
+        let mut hit_anything: Option<HitRecord> = None;
+        for h in self.objects.iter() {
+            if let Some(hit) = h.hit(r, t_min, closest_so_far) {
+                closest_so_far = hit.t;
+                hit_anything = Some(hit);
             }
-
-            // If the ray hit nothing we draw the background
-            (None, _) => (&world.background)(&self),
         }
-    }
-}
-
-pub trait Hittable {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
-}
-
-// #[derive(Debug, PartialEq, Clone, Copy)]
-pub struct HitRecord<'a> {
-    pub point: Vec3,
-    pub normal: Vec3,
-    pub t: f64,
-    pub front_face: bool,
-    pub material: &'a dyn Material,
-}
-
-impl<'a> HitRecord<'a> {
-    pub fn new(
-        point: Vec3,
-        normal: Vec3,
-        t: f64,
-        front_face: bool,
-        material: &'a dyn Material,
-    ) -> Self {
-        HitRecord {
-            point,
-            normal,
-            t,
-            front_face,
-            material,
-        }
+        hit_anything
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::{clamp, math::Vec3, Camera, HittableList, RTError, Ray};
+use crate::{clamp, math::Vec3, Camera, RTError, Ray, World};
 use image::ImageBuffer;
 use rand::Rng;
 use std::{collections::HashMap, ops, time::Instant};
@@ -42,6 +42,18 @@ impl ops::Mul<Color> for Color {
     }
 }
 
+impl ops::Add<Color> for Color {
+    type Output = Color;
+
+    fn add(self, other: Color) -> Color {
+        let mut sum_vec = &self.vec + &other.vec;
+        sum_vec.x = f64::min(sum_vec.x, 1.0);
+        sum_vec.y = f64::min(sum_vec.y, 1.0);
+        sum_vec.z = f64::min(sum_vec.z, 1.0);
+        Color::new_with_vec(sum_vec)
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Image {
     pub pixels: HashMap<(u32, u32), Color>,
@@ -70,13 +82,16 @@ impl Image {
     }
 }
 
-pub fn create_img(
+pub fn create_img<F>(
     mut img: Image,
-    world: HittableList,
+    world: World<F>,
     samples_per_pixel: u32,
     camera: Camera,
     depth: u32,
-) -> Image {
+) -> Image
+where
+    F: Fn(&Ray) -> Color,
+{
     let mut rng = rand::thread_rng();
 
     let total_rays_to_trace = img.height * img.width * samples_per_pixel;
@@ -115,7 +130,7 @@ pub fn create_img(
     img
 }
 
-pub fn write_img_to_file(path: &str, img: Image) -> Result<(), RTError> {
+pub fn write_img_to_file(path: &str, img: &Image) -> Result<(), RTError> {
     if img.height * img.width != img.pixels.len() as u32 {
         return Err(RTError::InconsistencySizePixels {
             h: img.height,
@@ -125,7 +140,7 @@ pub fn write_img_to_file(path: &str, img: Image) -> Result<(), RTError> {
     };
 
     let img_to_write = ImageBuffer::from_fn(img.width, img.height, |w, h| {
-        let color = img.get_color_pixel(img.width - w, h);
+        let color = img.get_color_pixel(w, img.height - h);
         let r = (256.0 * clamp(color.r().sqrt(), 0.0, 0.999)) as u8;
         let g = (256.0 * clamp(color.g().sqrt(), 0.0, 0.999)) as u8;
         let b = (256.0 * clamp(color.b().sqrt(), 0.0, 0.999)) as u8;

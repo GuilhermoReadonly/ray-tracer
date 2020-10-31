@@ -3,6 +3,31 @@ use rand::Rng;
 
 pub trait Material {
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Ray, Color)>;
+
+    fn emitted(&self) -> Color {
+        Color::new(0.0, 0.0, 0.0)
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct DiffuseLight {
+    pub emit: Color,
+}
+
+impl DiffuseLight {
+    pub fn new(emit: Color) -> DiffuseLight {
+        DiffuseLight { emit }
+    }
+}
+
+impl Material for DiffuseLight {
+    fn scatter(&self, _ray_in: &Ray, _hit_record: &HitRecord) -> Option<(Ray, Color)> {
+        None
+    }
+
+    fn emitted(&self) -> Color {
+        self.emit
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

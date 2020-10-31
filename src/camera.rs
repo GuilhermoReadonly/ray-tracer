@@ -10,6 +10,9 @@ pub struct Camera {
     pub v: Vec3,
     pub w: Vec3,
     pub lens_radius: f64,
+    pub aperture: f64,
+    pub focus_dist: f64,
+    pub vfov: f64,
 }
 
 impl Camera {
@@ -46,6 +49,9 @@ impl Camera {
             v,
             w,
             lens_radius,
+            aperture,
+            focus_dist,
+            vfov,
         }
     }
 
