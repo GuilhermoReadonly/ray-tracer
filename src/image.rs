@@ -46,11 +46,7 @@ impl ops::Add<Color> for Color {
     type Output = Color;
 
     fn add(self, other: Color) -> Color {
-        let mut sum_vec = &self.vec + &other.vec;
-        sum_vec.x = f64::min(sum_vec.x, 1.0);
-        sum_vec.y = f64::min(sum_vec.y, 1.0);
-        sum_vec.z = f64::min(sum_vec.z, 1.0);
-        Color::new_with_vec(sum_vec)
+        Color::new_with_vec(&self.vec + &other.vec)
     }
 }
 

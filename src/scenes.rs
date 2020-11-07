@@ -155,15 +155,15 @@ pub fn random_scene() -> (Image, World<impl Fn(&Ray) -> Color>, Camera, u32, u32
 pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Camera, u32, u32) {
     // Image
     let aspect_ratio = 16.0 / 9.0;
-    let image_width: u32 = 400;
+    let image_width: u32 = 1200;
     let image_height: u32 = (image_width as f64 / aspect_ratio) as u32;
     let img = Image::new(image_width, image_height);
-    let samples_per_pixel = 50;
-    let depth = 10;
+    let samples_per_pixel = 10000;
+    let depth = 50;
 
     // World
     let mut world = World::new(|ray: &Ray| Color::new(0.0, 0.0, 0.0));
-    let ground_material = Lambertian::new(Color::new(0.5, 0.5, 0.5));
+    let ground_material = Lambertian::new(Color::new(0.8, 0.8, 0.8));
     world.add(Sphere::new_boxed(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
@@ -176,22 +176,27 @@ pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Came
         for b in -3..3 {
             let choose_mat = rng.gen_range(0.0, 1.0);
             let center = Vec3::new(
-                a as f64 * 5.0 * rng.gen::<(f64)>(),
+                a as f64 * 3.0 * rng.gen::<(f64)>(),
                 0.2,
-                b as f64 * 5.0 * rng.gen::<(f64)>(),
+                b as f64 * 3.0 * rng.gen::<(f64)>(),
             );
 
             if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                if (choose_mat < 0.8) {
+                if choose_mat < 0.25 {
                     // diffuse
                     let albedo: Color = Color::new_random() * Color::new_random();
                     let sphere_material = Lambertian::new(albedo);
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
-                } else if (choose_mat < 0.95) {
+                } else if choose_mat >= 0.25 && choose_mat < 0.50  {
                     // metal
                     let albedo = Color::new_random();
                     let fuzz = rng.gen_range(0.0, 0.5);
                     let sphere_material = Metal::new(albedo, fuzz);
+                    world.add(Sphere::new_boxed(center, 0.2, sphere_material));
+                } else if choose_mat >= 0.50 && choose_mat < 0.75  {
+                    // emit light
+                    let emit = Color::new_random() ;
+                    let sphere_material = DiffuseLight::new(emit);
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
                 } else {
                     // glass
@@ -212,11 +217,11 @@ pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Came
     let material3 = Metal::new(Color::new(0.7, 0.6, 0.5), 0.0);
     world.add(Sphere::new_boxed(Vec3::new(4.0, 1.0, 0.0), 1.0, material3));
 
-    let material4 = DiffuseLight::new(Color::new(1.0, 1.0, 1.0));
-    world.add(Sphere::new_boxed(Vec3::new(-5.0, 1.0, 2.0), 1.0, material4));
+    let material4 = DiffuseLight::new(Color::new(8.0, 8.0, 8.0));
+    world.add(Sphere::new_boxed(Vec3::new(0.0, 4.0, 0.0), 1.0, material4));
 
     // Camera
-    let lookfrom = Vec3::new(13.0, 2.0, 3.0);
+    let lookfrom = Vec3::new(8.0, 2.0, 8.0);
     let lookat = Vec3::new(0.0, 0.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let vfov = 20.0 / 360.0 * TAU;
