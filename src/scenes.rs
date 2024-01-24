@@ -158,7 +158,7 @@ pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Came
     let image_width: u32 = 1200;
     let image_height: u32 = (image_width as f64 / aspect_ratio) as u32;
     let img = Image::new(image_width, image_height);
-    let samples_per_pixel = 10000;
+    let samples_per_pixel = 500;
     let depth = 50;
 
     // World

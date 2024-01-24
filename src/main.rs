@@ -25,7 +25,7 @@ fn main() -> Result<(), RTError> {
         ),
         &img,
     )?;
-    println!("Image writed in {} s", now.elapsed().as_secs_f64());
+    println!("Image written in {} s", now.elapsed().as_secs_f64());
 
     Ok(())
 }
