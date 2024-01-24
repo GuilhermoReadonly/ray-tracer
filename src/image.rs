@@ -90,8 +90,8 @@ where
 {
     let mut rng = rand::thread_rng();
 
-    let total_rays_to_trace = img.height * img.width * samples_per_pixel;
-    let mut ray_traced = 0;
+    let total_rays_to_trace: u64 = img.height as u64 * img.width as u64 * samples_per_pixel as u64;
+    let mut ray_traced: u64 = 0;
 
     let mut timer = Instant::now();
 

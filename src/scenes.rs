@@ -187,15 +187,15 @@ pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Came
                     let albedo: Color = Color::new_random() * Color::new_random();
                     let sphere_material = Lambertian::new(albedo);
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
-                } else if choose_mat >= 0.25 && choose_mat < 0.50  {
+                } else if choose_mat >= 0.25 && choose_mat < 0.50 {
                     // metal
                     let albedo = Color::new_random();
                     let fuzz = rng.gen_range(0.0, 0.5);
                     let sphere_material = Metal::new(albedo, fuzz);
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
-                } else if choose_mat >= 0.50 && choose_mat < 0.75  {
+                } else if choose_mat >= 0.50 && choose_mat < 0.75 {
                     // emit light
-                    let emit = Color::new_random() ;
+                    let emit = Color::new_random();
                     let sphere_material = DiffuseLight::new(emit);
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
                 } else {
