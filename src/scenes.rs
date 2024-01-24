@@ -92,7 +92,7 @@ pub fn random_scene() -> (Image, World<impl Fn(&Ray) -> Color>, Camera, u32, u32
 
     for a in -11..11 {
         for b in -11..11 {
-            let choose_mat = rng.gen_range(0.0, 1.0);
+            let choose_mat = rng.gen_range(0.0..1.0);
             let center = Vec3::new(
                 a as f64 + 0.9 * rng.gen::<(f64)>(),
                 0.2,
@@ -108,13 +108,13 @@ pub fn random_scene() -> (Image, World<impl Fn(&Ray) -> Color>, Camera, u32, u32
                 } else if (choose_mat < 0.95) {
                     // metal
                     let albedo = Color::new_random();
-                    let fuzz = rng.gen_range(0.0, 0.5);
+                    let fuzz = rng.gen_range(0.0..0.5);
                     let sphere_material = Metal::new(albedo, fuzz);
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
                 } else {
                     // glass
                     let sphere_material =
-                        Dielectric::new(Color::new_random(), rng.gen_range(0.0, 3.0));
+                        Dielectric::new(Color::new_random(), rng.gen_range(0.0..3.0));
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
                 }
             }
@@ -174,7 +174,7 @@ pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Came
 
     for a in -3..3 {
         for b in -3..3 {
-            let choose_mat = rng.gen_range(0.0, 1.0);
+            let choose_mat = rng.gen_range(0.0..1.0);
             let center = Vec3::new(
                 a as f64 * 3.0 * rng.gen::<(f64)>(),
                 0.2,
@@ -190,7 +190,7 @@ pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Came
                 } else if choose_mat >= 0.25 && choose_mat < 0.50 {
                     // metal
                     let albedo = Color::new_random();
-                    let fuzz = rng.gen_range(0.0, 0.5);
+                    let fuzz = rng.gen_range(0.0..0.5);
                     let sphere_material = Metal::new(albedo, fuzz);
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
                 } else if choose_mat >= 0.50 && choose_mat < 0.75 {
@@ -201,7 +201,7 @@ pub fn random_scene_with_lights() -> (Image, World<impl Fn(&Ray) -> Color>, Came
                 } else {
                     // glass
                     let sphere_material =
-                        Dielectric::new(Color::new_random(), rng.gen_range(0.0, 3.0));
+                        Dielectric::new(Color::new_random(), rng.gen_range(0.0..3.0));
                     world.add(Sphere::new_boxed(center, 0.2, sphere_material));
                 }
             }

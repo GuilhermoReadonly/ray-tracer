@@ -101,8 +101,8 @@ where
             // eprintln!("Progression: {}%", progression*100.0);
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..samples_per_pixel {
-                let u = (w as f64 + rng.gen_range(0.0, 1.0)) / (img.width - 1) as f64;
-                let v = (h as f64 + rng.gen_range(0.0, 1.0)) / (img.height - 1) as f64;
+                let u = (w as f64 + rng.gen_range(0.0..1.0)) / (img.width - 1) as f64;
+                let v = (h as f64 + rng.gen_range(0.0..1.0)) / (img.height - 1) as f64;
                 let ray: Ray = camera.get_ray(u, v);
 
                 let ray_color = ray.ray_color(&world, depth);

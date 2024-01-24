@@ -16,9 +16,9 @@ impl Vec3 {
 
     pub fn new_random(min: f64, max: f64) -> Self {
         let mut rng = rand::thread_rng();
-        let x: f64 = rng.gen_range(min, max);
-        let y: f64 = rng.gen_range(min, max);
-        let z: f64 = rng.gen_range(min, max);
+        let x: f64 = rng.gen_range(min..max);
+        let y: f64 = rng.gen_range(min..max);
+        let z: f64 = rng.gen_range(min..max);
 
         Vec3 { x, y, z }
     }
@@ -34,8 +34,8 @@ impl Vec3 {
 
     pub fn new_random_unit() -> Self {
         let mut rng = rand::thread_rng();
-        let a: f64 = rng.gen_range(0.0, TAU);
-        let z: f64 = rng.gen_range(-1.0, 1.0);
+        let a: f64 = rng.gen_range(0.0..TAU);
+        let z: f64 = rng.gen_range(-1.0..1.0);
         let r: f64 = (1.0 - z.powi(2)).sqrt();
 
         Vec3::new(r * a.cos(), r * a.sin(), z)
@@ -44,7 +44,7 @@ impl Vec3 {
     pub fn new_random_in_unit_disk() -> Self {
         let mut rng = rand::thread_rng();
         loop {
-            let p = Vec3::new(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0), 0.0);
+            let p = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0);
             if p.length_squared() >= 1.0 {
                 continue;
             };
@@ -251,7 +251,7 @@ mod tests {
 
     fn rand_f64() -> f64 {
         let mut rng = rand::thread_rng();
-        rng.gen_range(-1_000_000_000.0, 1_000_000_000.0)
+        rng.gen_range(-1_000_000_000.0..1_000_000_000.0)
     }
 
     fn rand_vec3() -> Vec3 {
@@ -303,13 +303,13 @@ mod tests {
     fn mul_vec3() {
         let vec1 = rand_vec3();
         let mut rng = rand::thread_rng();
-        let n = rng.gen_range(-1_000_000_000.0, 1_000_000_000.0);
+        let n = rng.gen_range(-1_000_000_000.0..1_000_000_000.0);
         let vec_result = Vec3::new(vec1.x * n, vec1.y * n, vec1.z * n);
         assert_eq!(vec1 * n, vec_result);
 
         let vec1 = rand_vec3();
         let mut rng = rand::thread_rng();
-        let n = rng.gen_range(-1_000_000_000.0, 1_000_000_000.0);
+        let n = rng.gen_range(-1_000_000_000.0..1_000_000_000.0);
         let vec_result = Vec3::new(vec1.x * n, vec1.y * n, vec1.z * n);
         assert_eq!(n * vec1, vec_result);
 
@@ -323,13 +323,13 @@ mod tests {
     fn div_vec3() {
         let vec1 = rand_vec3();
         let mut rng = rand::thread_rng();
-        let n = rng.gen_range(-1_000.0, 1_000.0);
+        let n = rng.gen_range(-1_000.0..1_000.0);
         let vec_result = Vec3::new(vec1.x / n, vec1.y / n, vec1.z / n);
         assert_eq!(vec1 / n, vec_result);
 
         let vec1 = rand_vec3();
         let mut rng = rand::thread_rng();
-        let n = rng.gen_range(-1_000.0, 1_000.0);
+        let n = rng.gen_range(-1_000.0..1_000.0);
         let vec_result = Vec3::new(n / vec1.x, n / vec1.y, n / vec1.z);
         assert_eq!(n / vec1, vec_result);
     }
@@ -371,17 +371,17 @@ mod tests {
         let result = &vec1 / &vec1.length();
         assert_eq!(Vec3::unit(vec1), result);
 
-        let n = rng.gen_range(0.0, 1_000.0);
+        let n = rng.gen_range(0.0..1_000.0);
         let vec1 = Vec3::new(n, 0.0, 0.0);
         let result = Vec3::new(1.0, 0.0, 0.0);
         assert_eq!(Vec3::unit(vec1), result);
 
-        let n = rng.gen_range(0.0, 1_000.0);
+        let n = rng.gen_range(0.0..1_000.0);
         let vec1 = Vec3::new(0.0, n, 0.0);
         let result = Vec3::new(0.0, 1.0, 0.0);
         assert_eq!(Vec3::unit(vec1), result);
 
-        let n = rng.gen_range(0.0, 1_000.0);
+        let n = rng.gen_range(0.0..1_000.0);
         let vec1 = Vec3::new(0.0, 0.0, n);
         let result = Vec3::new(0.0, 0.0, 1.0);
         assert_eq!(Vec3::unit(vec1), result);
