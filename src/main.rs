@@ -1,4 +1,4 @@
-use ray_tracer::{self, RTError, run};
+use ray_tracer::{self, run, RTError};
 use std::time::Instant;
 mod scenes;
 
@@ -6,7 +6,7 @@ fn main() -> Result<(), RTError> {
     println!("Starting...");
     let now = Instant::now();
 
-    run();
+    pollster::block_on(run());
 
     println!("Run in {} s", now.elapsed().as_secs_f64());
 
